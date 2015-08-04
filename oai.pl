@@ -284,6 +284,16 @@ sub processOAI {
 						if ($xmlfile =~ m/\.jpg/i) {
 							$xmlfile =~ s/<\/doc>/<field name="format">Still Image<\/field><\/doc>/;
 							}
+						if ($xmlfile =~ m/>Scholar Archive</i) {
+							$xmlfile =~ s/<\/doc>/<field name="format">Text<\/field><\/doc>/;
+							}
+						if ($xmlfile =~ m/>Oral History</i) {
+							$xmlfile =~ s/<\/doc>/<field name="format">Text<\/field><\/doc>/;
+							}
+						###### correct format for Naturopathic medicine
+						if ($xmlfile =~ m/>Naturopathic Medicine</i) {
+							$xmlfile =~ s/"format">[^<]*</"format">Text</;
+							}
 						}
 	
 				### add thumbnail if none provided
