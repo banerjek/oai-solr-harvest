@@ -6,17 +6,20 @@ require Encode;
 use strict;
 use threads;
 
-my $thread_1 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=1', 'omeka-campus');
-my $thread_2 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=2', 'omeka-hca');
-my $thread_3 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=3', 'omeka-cori');
-my $thread_4 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=12', 'omeka-brain');
-my $thread_5 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-oralhist', 'hca-oralhist');
-my $thread_6 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-books', 'hca-books');
-my $thread_7 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-cac', 'hca-cac');
-my $thread_8 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'fdadrug');
-my $thread_9 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'naturopathic');
-my $thread_10 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'primate');
-my $thread_11 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'etd');
+my $ohsu_omeka = 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=';
+my $ohsu_bepress = 'http://digitalcommons.ohsu.edu/do/oai/?verb=';
+
+my $thread_1 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPrefix=oai_dc&set=1', 'omeka-campus');
+my $thread_2 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPrefix=oai_dc&set=2', 'omeka-hca');
+my $thread_3 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPrefix=oai_dc&set=3', 'omeka-cori');
+my $thread_4 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPrefix=oai_dc&set=12', 'omeka-brain');
+my $thread_5 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-oralhist', 'hca-oralhist');
+my $thread_6 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-books', 'hca-books');
+my $thread_7 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-cac', 'hca-cac');
+my $thread_8 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'fdadrug');
+my $thread_9 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'naturopathic');
+my $thread_10 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'primate');
+my $thread_11 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'etd');
 
 $thread_1->join;
 $thread_2->join;
