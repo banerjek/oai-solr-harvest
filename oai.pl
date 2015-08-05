@@ -195,9 +195,6 @@ sub cleanContent {
 	$content =~ s/\s*<\/metadata>\s*//g;
 	$content =~ s/\s*<\/oai_dc:dc>\s*//g;
 
-	# delete other unneeded fields which are properly structured
-	$content = &deleteFields($content);
-
 	# remap doi fields
 	$content =~ s/<dc:identifier>(doi:|http:\/\/dx.doi.org\/)([^<]+)<\/dc:identifier>/<doi>doi:\2<\/doi>/g;
 	#remap omeka identifiers
@@ -266,6 +263,7 @@ sub processOAI {
 	
 		$content = &detectSystem($content);
 		$content = &cleanContent($content);
+		$content = &deleteFields($content);
 		$content = &doiOnly($content);
 		$content = &mapFields($content);
 	
