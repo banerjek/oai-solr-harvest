@@ -161,16 +161,17 @@ sub mapFields {
 #################################################
 sub cleanContent {
 	my $content = $_[0];
+	# remove newlines
+	$content =~ s/\&#13;//g;
+
 	# clean space around tags
 	$content =~ s/>\s*/>/g;
 	$content =~ s/\s*</</g;
-	# remove newlines
-	$content =~ s/&#13;//g;
 	# remove header	
 	$content =~ s/.*<ListRecords>//;
 	#split into individual records
-	$content =~ s/<\/record>\s*/<\/doc>\n/g;
 	$content =~ s/<record>/<doc>/g;
+	$content =~ s/<\/record>\s*/<\/doc>\n/g;
 
 	#normalize dates
 	$content =~ s/<dc:date(.created)?>/<pub_date>/g;
