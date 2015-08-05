@@ -108,11 +108,14 @@ sub doiOnly {
 sub deleteFields {
 	my $content = $_[0];
 	my $badfield = '';
-	my @badfields = ("dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source");
+	my @badfields = ("br", "p", "dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source");
 	
 	for $badfield(@badfields) {
 		$content =~ s/<$badfield>([^<]*)(<\/$badfield>)//g; 
 		}
+	# delete self closing line breaks and paragraph markers
+	$content =~ s/<br \/>//g; 
+	$content =~ s/<p \/>//g; 
 	return $content;
 	}
 
