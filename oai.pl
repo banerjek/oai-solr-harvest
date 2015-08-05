@@ -66,6 +66,7 @@ sub addCollection {
 
 	my %collection_map;
 	$collection_map{'publication:etd'} = 'Scholar Archive';
+	$collection_map{'publication:fdadrug'} = 'FDA Drug Approval Documents';
 	$collection_map{'publication:hca'} = 'Historical Collections &amp; Archives';
 	$collection_map{'publication:hca-oralhist'} = 'Oral History';
 	$collection_map{'publication:hca-books'} = 'Rare Book';
@@ -177,7 +178,8 @@ sub cleanContent {
 	$content =~ s/<pub_date>[^<]*(\d{4})[^<]*</<pub_date>\1</g;
 	$content =~ s/<pub_date_display>[^<]*(\d{4})[^<]*Z</<pub_date_display>\1</g;
 	$content =~ s/<pub_date_display>[^<]*\d*\/?\d*\?(\d{4})[^<]*</<pub_date_display>\1</g;
-	$content =~ s/<pub_date>[^<]*no date[^<]*<//ig;
+	$content =~ s/<pub_date>[^<]*no date[^<]*<\/pub_date>//ig;
+	$content =~ s/<pub_date>ND<\/pub_date>//ig;
 	
 	#normalize formats
 	$content =~ s/>still image</>Still Image</ig;
@@ -242,6 +244,7 @@ sub processOAI {
 	
 	while ($url) {
 		my $content = get $url;
+		print "$url\n";
 		$resumptionToken = '';	
 	
 		if ($content =~ m/<resumptionToken[^>]+>([^<]+)<\/resumptionToken>/) {
