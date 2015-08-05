@@ -6,17 +6,17 @@ require Encode;
 use strict;
 use threads;
 
-my $thread_1 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=1', 'ListRecords&resumptionToken=', 'omeka-campus');
-my $thread_2 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=2', 'ListRecords&resumptionToken=', 'omeka-hca');
-my $thread_3 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=3', 'ListRecords&resumptionToken=', 'omeka-cori');
-my $thread_4 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=12', 'ListRecords&resumptionToken=', 'omeka-brain');
-my $thread_5 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-oralhist', 'ListRecords&resumptionToken=', 'hca-oralhist');
-my $thread_6 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-books', 'ListRecords&resumptionToken=', 'hca-books');
-my $thread_7 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-cac', 'ListRecords&resumptionToken=', 'hca-cac');
-my $thread_8 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'ListRecords&resumptionToken=', 'fdadrug');
-my $thread_9 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'ListRecords&resumptionToken=', 'naturopathic');
-my $thread_10 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'ListRecords&resumptionToken=', 'primate');
-my $thread_11 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'ListRecords&resumptionToken=', 'etd');
+my $thread_1 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=1', 'omeka-campus');
+my $thread_2 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=2', 'omeka-hca');
+my $thread_3 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=3', 'omeka-cori');
+my $thread_4 = threads->new(\&processOAI, 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=', 'ListRecords&metadataPrefix=oai_dc&set=12', 'omeka-brain');
+my $thread_5 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-oralhist', 'hca-oralhist');
+my $thread_6 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-books', 'hca-books');
+my $thread_7 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:hca-cac', 'hca-cac');
+my $thread_8 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'fdadrug');
+my $thread_9 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'naturopathic');
+my $thread_10 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'primate');
+my $thread_11 = threads->new(\&processOAI, 'http://digitalcommons.ohsu.edu/do/oai/?verb=', 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'etd');
 
 $thread_1->join;
 $thread_2->join;
@@ -210,8 +210,7 @@ sub processOAI {
 	########################################################
 	my $oai_base = @_[0];
 	my $oai_prefix = @_[1];
-	my $oai_resumption = @_[2];
-	my $collection = @_[3];
+	my $collection = @_[2];
 	my $display_collection = $collection;
 	my $good_to_print = 0;
 	my @content;
@@ -222,6 +221,7 @@ sub processOAI {
 	# e.g. $url = 'ListRecords&metadataPrefix=oai_dc&set=1'
 	##############################################################
 	my $url = $oai_base . $oai_prefix;
+	my $oai_resumption = 'ListRecords&resumptionToken=';
 	
 	###############################################################
 	# $baseurl is what we expect the resumption token to be added to
