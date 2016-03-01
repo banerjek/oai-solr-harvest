@@ -3,6 +3,7 @@
 use Data::Dumper;
 use LWP::Simple;
 require Encode;
+use utf8;
 use strict;
 use threads;
 
@@ -16,10 +17,10 @@ my $thread_4 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPref
 my $thread_5 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-oralhist', 'hca-oralhist');
 my $thread_6 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-books', 'hca-books');
 my $thread_7 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:hca-cac', 'hca-cac');
-my $thread_8 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'fdadrug');
-my $thread_9 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'naturopathic');
-my $thread_10 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'primate');
-my $thread_11 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'etd');
+my $thread_8 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:fdadrug', 'bepress-fdadrug');
+my $thread_9 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:naturopathic', 'bepress-naturopathic');
+my $thread_10 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:primate', 'bepress-primate');
+my $thread_11 = threads->new(\&processOAI, $ohsu_bepress, 'ListRecords&metadataPrefix=dcq&set=publication:etd', 'bepress-etd');
 
 $thread_1->join;
 $thread_2->join;
@@ -45,7 +46,8 @@ sub detectSystem {
 	######################
 	if ($content =~ /oai-pmh-repository/) {
 		$content =~ s/<dc:identifier>([^<]+\/files\/)original\/([^<]+)<\/dc:identifier>/<file_identifier>\1original\/\2<\/file_identifier><thumbnail>\1thumbnails\/\2<\/thumbnail>/g;
-		$content =~ s/\.JPG(<\/thumbnails>)/.jpg\1/g;
+		$content =~ s/\.JPG(<\/thumbnail>)/.jpg\1/g;
+		$content =~ s/\.jpeg(<\/thumbnail>)/.jpg\1/g;
 		}
 	######################
 	# detect bepress systems
@@ -82,6 +84,21 @@ sub addCollection {
 	$collection = $collection_map{$collection};
 
 	$content =~ s/(<\/record>)/<collection>$collection<\/collection>\1/g;
+	return $content;
+	}
+
+########################################################################
+# Add virtual collections based on parsing of Source and/or other fields
+########################################################################
+sub addVirtualCollections {
+	my $content = $_[0];
+	my $collection = '';
+	my @collections = ('Audio Visual Collection', 'Clarice Ashworth Francone Collection', 'Charles F. Norris Photograph Album', "Colonel Strohm's Nurses Photograph Album", 'Esther Pohl Lovejoy Collection', 'George W. King Scrapbook', 'Grace Phelps Papers', 'Herbert Merton Greene Papers', 'Historical Image Collection', 'Jeri L. Dobbs Collection', 'Medical Museum Collection', 'Melvin Paul Judkins Collection', 'Richard B. Dillehunt Photograph Album');
+
+	foreach $collection(@collections) {
+		$content =~ s/<dc:source>$collection[^<]*<\/dc:source>/<collection>$collection<\/collection>\1/g;
+		}
+
 	return $content;
 	}
 
@@ -245,9 +262,11 @@ sub processOAI {
 	
 	while ($url) {
 		my $content = get $url;
-		print "$url\n";
+		## remove high characters -- will mess up some foreign characters
+		$content =~ s/[^\x00-\x7f]//g;
 		$resumptionToken = '';	
 	
+
 		if ($content =~ m/<resumptionToken[^>]+>([^<]+)<\/resumptionToken>/) {
 			($resumptionToken) = $1;
 			}
@@ -261,10 +280,9 @@ sub processOAI {
 		foreach $display_collection(@unique_collections) {
 			$content = &addCollection($content, $display_collection);
 			}
-	
+		$content = &addVirtualCollections($content);
 		$content = &detectSystem($content);
 		$content = &cleanContent($content);
-		$content = &deleteFields($content);
 		$content = &doiOnly($content);
 		$content = &mapFields($content);
 	
@@ -287,6 +305,10 @@ sub processOAI {
 			foreach $xmlfile (@content) {
 				open (OUTFILE, '>:utf8', 'xml/' . $collection . "." . sprintf("%06d", $counter) . ".xml");
 				
+				### add collections based on specific fields
+					if ($xmlfile =~ m/Office of Strategic Communications</i) {
+						$xmlfile =~ s/<\/doc>/<field name="collection">Strategic Communication Images<\/field><\/doc>/;
+						}
 				### add format if none provided
 					if ($xmlfile !~ m/<field name="format"/) {
 						if ($xmlfile =~ m/\.jpg/i) {
