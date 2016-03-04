@@ -128,7 +128,7 @@ sub deleteFields {
 	my @badfields = ("br", "p", "dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source");
 	
 	for $badfield(@badfields) {
-		$content =~ s/<$badfield>([^<]*)(<\/$badfield>)//g; 
+		$content =~ s/<$badfield>.*<\/$badfield>//g; 
 		}
 	# delete self closing line breaks and paragraph markers
 	$content =~ s/<br \/>//g; 
@@ -163,10 +163,10 @@ sub mapFields {
 	$field_map{'thumbnail'} = 'thumbnail';
 	
 	foreach my $field (keys %field_map) {
-		$content =~ s/<$field>([^<]+)(<\/$field>)/<field name="$field_map{$field}">\1<\/field>/g; 
+		$content =~ s/<$field>(.+)(<\/$field>)/<field name="$field_map{$field}">\1<\/field>/g; 
 		#### delete unwanted fields
 		if (length($field_map{$field}) == 0) {
-			$content =~ s/<$field>([^<]+)(<\/$field>)//g; 
+			$content =~ s/<$field><\/$field>//g; 
 			}
 		}
 	return $content;
@@ -263,7 +263,7 @@ sub processOAI {
 	while ($url) {
 		my $content = get $url;
 		## remove high characters -- will mess up some foreign characters
-		$content =~ s/[^\x00-\x7f]//g;
+		$content =~ s/[^[:ascii:]]//g;
 		$resumptionToken = '';	
 	
 
@@ -283,6 +283,7 @@ sub processOAI {
 		$content = &addVirtualCollections($content);
 		$content = &detectSystem($content);
 		$content = &cleanContent($content);
+		$content = &deleteFields($content);
 		$content = &doiOnly($content);
 		$content = &mapFields($content);
 	
