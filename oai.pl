@@ -119,16 +119,42 @@ sub doiOnly {
 	return $newcontent;
 	}
 
+##################################################################################
+# Regex string replacements kept breaking, so this was changed to a string routine
+##################################################################################
+
+
 ################################
 # Delete wholly unwanted fields
 ################################
 sub deleteFields {
 	my $content = $_[0];
 	my $badfield = '';
-	my @badfields = ("br", "p", "dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source");
+	my $newcontent = '';
+	my $begin_pos = 0;
+	my $end_pos = 0;
+	my $last_pos = 0;
+
+	my @badfields = ("dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source", "p", "br");
 	
 	for $badfield(@badfields) {
-		$content =~ s/<$badfield>.*<\/$badfield>//g; 
+		#$content =~ s/<$badfield>[^<]*<\/$badfield>//g; 
+		#
+		# Regex expression caused core dump so switch to string routine
+		$begin_pos = 0;
+		$end_pos = 0;
+		$last_pos = 0;
+		$newcontent = '';
+
+		while(($begin_pos = index($content, '<' . $badfield . '>', $last_pos)) > -1){
+			$end_pos = index($content, '</' . $badfield . '>', $begin_pos) + length($badfield) + 3; ######## field and content
+			#print substr($content, $begin_pos, $end_pos - $begin_pos) . "\n";
+			$newcontent .= substr($content, $last_pos, $begin_pos - $last_pos - 1);
+			$last_pos = $end_pos + 1; ##### skip over the tag
+			}	
+		if (length($newcontent) > 1) {
+			$content = $newcontent;
+			}
 		}
 	# delete self closing line breaks and paragraph markers
 	$content =~ s/<br \/>//g; 
@@ -163,7 +189,7 @@ sub mapFields {
 	$field_map{'thumbnail'} = 'thumbnail';
 	
 	foreach my $field (keys %field_map) {
-		$content =~ s/<$field>(.+)(<\/$field>)/<field name="$field_map{$field}">\1<\/field>/g; 
+		$content =~ s/<$field>([^<]*)<\/$field>/<field name="$field_map{$field}">\1<\/field>/g; 
 		#### delete unwanted fields
 		if (length($field_map{$field}) == 0) {
 			$content =~ s/<$field><\/$field>//g; 
@@ -280,10 +306,10 @@ sub processOAI {
 		foreach $display_collection(@unique_collections) {
 			$content = &addCollection($content, $display_collection);
 			}
+		$content = &deleteFields($content);
 		$content = &addVirtualCollections($content);
 		$content = &detectSystem($content);
 		$content = &cleanContent($content);
-		$content = &deleteFields($content);
 		$content = &doiOnly($content);
 		$content = &mapFields($content);
 	
