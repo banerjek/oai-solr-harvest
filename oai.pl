@@ -135,30 +135,32 @@ sub deleteFields {
 	my $end_pos = 0;
 	my $last_pos = 0;
 
-	my @badfields = ("dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source", "p", "br");
+	my @badfields = ("dc:thesis.degree.name", "dc:thesis.degree.level", "dc:description.abstract", "dc:date.available", "dc:description.note", "dc:relation", "dc:rights", "dc:source");
 	
 	for $badfield(@badfields) {
-		#$content =~ s/<$badfield>[^<]*<\/$badfield>//g; 
-		#
+		$content =~ s/<$badfield>[^<]*<\/$badfield>//g; 
+		
 		# Regex expression caused core dump so switch to string routine
-		$begin_pos = 0;
-		$end_pos = 0;
-		$last_pos = 0;
-		$newcontent = '';
-
-		while(($begin_pos = index($content, '<' . $badfield . '>', $last_pos)) > -1){
-			$end_pos = index($content, '</' . $badfield . '>', $begin_pos) + length($badfield) + 3; ######## field and content
-			#print substr($content, $begin_pos, $end_pos - $begin_pos) . "\n";
-			$newcontent .= substr($content, $last_pos, $begin_pos - $last_pos - 1);
-			$last_pos = $end_pos + 1; ##### skip over the tag
-			}	
-		if (length($newcontent) > 1) {
-			$content = $newcontent;
-			}
+#		$begin_pos = 0;
+#		$end_pos = 0;
+#		$last_pos = 0;
+#		$newcontent = '';
+#
+#		while(($begin_pos = index($content, '<' . $badfield . '>', $last_pos)) > -1){
+#			$end_pos = index($content, '</' . $badfield . '>', $begin_pos) + length($badfield) + 3; ######## field and content
+#			#print substr($content, $begin_pos, $end_pos - $begin_pos) . "\n";
+#			$newcontent .= substr($content, $last_pos, $begin_pos - $last_pos - 1);
+#			$last_pos = $end_pos + 1; ##### skip over the tag
+#			}	
+#		if (length($newcontent) > 1) {
+#			$content = $newcontent;
+#			}
 		}
-	# delete self closing line breaks and paragraph markers
-	$content =~ s/<br \/>//g; 
-	$content =~ s/<p \/>//g; 
+	# handle a few tags differently because they sometimes aren't closed 
+	$content =~ s/<(br|p|hr|li)>//g; 
+	$content =~ s/<\/(br|p|hr|li)>//g; 
+	$content =~ s/<(br|p|hr|li) \/>//g; 
+	$content =~ s/<(br|p|hr|li) \/>//g; 
 	return $content;
 	}
 
@@ -306,12 +308,19 @@ sub processOAI {
 		foreach $display_collection(@unique_collections) {
 			$content = &addCollection($content, $display_collection);
 			}
+#print "deleteFields\n";
 		$content = &deleteFields($content);
+#print "addCollections\n";
 		$content = &addVirtualCollections($content);
+#print "detectSystem\n";
 		$content = &detectSystem($content);
+#print "cleanContent\n";
 		$content = &cleanContent($content);
+#print "doiOnly\n";
 		$content = &doiOnly($content);
+#print "mapFields\n";
 		$content = &mapFields($content);
+#print "printOut\n";
 	
 		### open the file only if there is something to process 
 		if (length($content) > 50) {
@@ -372,7 +381,11 @@ sub processOAI {
 							$xmlfile =~ s/<\/doc>/<field name="thumbnail">http:\/\/digitalcollections.ohsu.edu\/files\/thumbnails\/paper.png<\/field><\/doc>/;
 							}
 						}
-				print OUTFILE "<add>$xmlfile</add>";
+				#### Hack to fix terminating </doc> fields getting stripped somewhere
+				$xmlfile = "<add>" . $xmlfile . "</add>";
+				$xmlfile =~ s/<\/field><\/add>/<\/field><\/doc><\/add>/;
+
+				print OUTFILE $xmlfile;
 				close(OUTFILE);
 				$counter++;
 				}
