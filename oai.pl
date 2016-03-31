@@ -93,10 +93,10 @@ sub addCollection {
 sub addVirtualCollections {
 	my $content = $_[0];
 	my $collection = '';
-	my @collections = ('Audio Visual Collection', 'Clarice Ashworth Francone Collection', 'Charles F. Norris Photograph Album', "Colonel Strohm's Nurses Photograph Album", 'Esther Pohl Lovejoy Collection', 'George W. King Scrapbook', 'Grace Phelps Papers', 'Herbert Merton Greene Papers', 'Historical Image Collection', 'Jeri L. Dobbs Collection', 'Medical Museum Collection', 'Melvin Paul Judkins Collection', 'Richard B. Dillehunt Photograph Album');
+	my @collections = ('Audio Visual Collection', 'Clarice Ashworth Francone Collection', 'Charles F. Norris Photograph Album', "Colonel Strohm's Nurses Photograph Album", 'Esther Pohl Lovejoy Collection', 'George W. King Scrapbook', 'Grace Phelps Papers', 'Herbert Merton Greene Papers', 'Historical Image Collection', 'Jeri L. Dobbs Collection', 'Medical Museum Collection', 'Melvin Paul Judkins Collection', 'Richard B. Dillehunt Photograph Album','Hospital Nursing Images','Strategic Communications Images');
 
 	foreach $collection(@collections) {
-		$content =~ s/<dc:source>$collection[^<]*<\/dc:source>/<collection>$collection<\/collection>\1/g;
+		$content =~ s/<dc:source>\s*$collection[^<]*<\/dc:source>/<collection>$collection<\/collection>/g;
 		}
 
 	return $content;
@@ -308,10 +308,10 @@ sub processOAI {
 		foreach $display_collection(@unique_collections) {
 			$content = &addCollection($content, $display_collection);
 			}
-#print "deleteFields\n";
-		$content = &deleteFields($content);
 #print "addCollections\n";
 		$content = &addVirtualCollections($content);
+#print "deleteFields\n";
+		$content = &deleteFields($content);
 #print "detectSystem\n";
 		$content = &detectSystem($content);
 #print "cleanContent\n";
@@ -342,9 +342,9 @@ sub processOAI {
 				open (OUTFILE, '>:utf8', 'xml/' . $collection . "." . sprintf("%06d", $counter) . ".xml");
 				
 				### add collections based on specific fields
-					if ($xmlfile =~ m/Office of Strategic Communications</i) {
-						$xmlfile =~ s/<\/doc>/<field name="collection">Strategic Communication Images<\/field><\/doc>/;
-						}
+			#		if ($xmlfile =~ m/Office of Strategic Communications</i) {
+			#			$xmlfile =~ s/<\/doc>/<field name="collection">Strategic Communication Images<\/field><\/doc>/;
+			#			}
 				### add format if none provided
 					if ($xmlfile !~ m/<field name="format"/) {
 						if ($xmlfile =~ m/\.jpg/i) {
