@@ -7,7 +7,7 @@ use utf8;
 use strict;
 use threads;
 
-my $ohsu_omeka = 'http://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=';
+my $ohsu_omeka = 'https://digitalcollections.ohsu.edu/oai-pmh-repository/request?verb=';
 my $ohsu_bepress = 'http://digitalcommons.ohsu.edu/do/oai/?verb=';
 
 my $thread_1 = threads->new(\&processOAI, $ohsu_omeka, 'ListRecords&metadataPrefix=oai_dc&set=1', 'omeka-campus');
